@@ -98,14 +98,94 @@ let books = [
 */
 
 const typeDefs = `
+  type Book {
+    title: String!
+    author: String!
+    published: Int!
+    genres: [String!]!
+  }
+
+  type Author {
+    name: String!
+    born: Int
+    bookCount: Int!
+  }
+
   type Query {
-    dummy: Int
+    bookCount: Int!
+    authorCount: Int!
+    allBooks(author: String, genre: String): [Book!]!
+    allAuthors: [Author!]!
+  }
+
+  type Mutation {
+    addBook(
+        title: String!
+        author: String!
+        published: Int!
+        genres: [String!]!
+    ): Book!,
+    editAuthor(
+        name: String!
+        setBornTo: Int!
+    ): Author
   }
 `
 
 const resolvers = {
   Query: {
-    dummy: () => 0
+    bookCount: () => books.length,
+    authorCount: () => authors.length,
+    allBooks: (parent, args) => {
+        if (args.author) {
+            return books.filter(book => book.author === args.author)
+        }
+        if (args.genre) {
+            return books.filter(book => book.genres.includes(args.genre))
+        }
+        return books
+    },
+    allAuthors: () => {
+        return authors.map(author => {
+        const bookCount = books.filter(book => book.author === author.name).length
+            return { name: author.name, born: author.born, bookCount }
+        })
+    }
+  },
+  Mutation: {
+    addBook: (parent, args) => {
+        const { title, author: authorName, published, genres } = args
+
+        let author = authors.find(a => a.name === authorName)
+
+        if (!author) {
+            author = {
+                name: authorName,
+                id: String(authors.length + 1)
+            }
+            authors.push(author)
+        }
+
+        const book = {
+            title,
+            published,
+            author: author.name,
+            id: String(books.length + 1)
+        }
+        books.push(book)
+        return book
+    },
+    editAuthor: (parent, args) => {
+        const { name, setBornTo } = args
+
+        const a = authors.find(a => a.name === name)
+
+        if(!a) return null
+
+        a.born = setBornTo
+
+        return a
+    }
   }
 }
 
