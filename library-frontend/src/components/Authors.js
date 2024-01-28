@@ -4,40 +4,22 @@ import { useState } from 'react'
 
 const Authors = (props) => {
   const { loading, error, data } = useQuery(ALL_AUTHORS)
-  const [updateYear] = useMutation(EDIT_AUTHOR, {
-    refetchQueries: [{ query: ALL_AUTHORS }],
-    onError: (error) => {
-      console.error('Error updating birth year:', error)
-    }
-  })
+  const [updateYear, result] = useMutation(EDIT_AUTHOR)
 
-  const [selectedAuthor, setSelectedAuthor] = useState('')
-  const [birthYear, setBirthYear] = useState('')
-
-  const handleAuthorChange = (event) => {
-    setSelectedAuthor(event.target.value)
-  }
-
-  const handleBirthYearChange = (event) => {
-    setBirthYear(event.target.value)
-  }
+  const [name, setName] = useState('')
+  const [year, setYear] = useState('')
 
   const handleUpdateBirthYear = async (event) => {
     event.preventDefault()
-    if (!selectedAuthor || !birthYear) {
-      console.error('Please select an author and enter a birth year')
-      return
-    }
-    try {
-      console.log('Updating birth year for:', selectedAuthor);
-      console.log('New birth year:', birthYear)
-      updateYear({
-        variables: { selectedAuthor, birthYear }
-      })
-      setBirthYear('')
-    } catch (error) {
-      console.error('Error updating birth year:', error)
-    }
+
+    
+      console.log('Updating birth year for:', name);
+      console.log('New birth year:', year)
+      const yearInInt = parseInt(year)
+      updateYear({ variables: { name, yearInInt } })
+
+      setYear('')
+      console.log('results:', result.data)
   }
 
   if (!props.show) {
@@ -76,7 +58,7 @@ const Authors = (props) => {
       <div>
         <h3>Set birth year</h3>
         <form onSubmit={handleUpdateBirthYear}>
-          <select value={selectedAuthor} onChange={handleAuthorChange}>
+          <select value={name} onChange={({ target }) => setName(target.value)}>
             <option value="">Select Author</option>
             {authors.map((author) => (
               <option key={author.name} value={author.name}>
@@ -87,8 +69,8 @@ const Authors = (props) => {
           <input
             type="number"
             placeholder="Birth Year"
-            value={birthYear}
-            onChange={handleBirthYearChange}
+            value={year}
+            onChange={({ target }) => setYear(target.value)}
           />
           <button type="submit">OK</button>
         </form>
