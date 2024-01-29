@@ -101,14 +101,14 @@ const typeDefs = `
   type Book {
     title: String!
     author: String!
-    published: Int!
-    genres: [String!]!
+    published: String!
+    genres: [String]
   }
 
   type Author {
     name: String!
-    born: Int
-    bookCount: Int!
+    born: String
+    bookCount: Int
   }
 
   type Query {
@@ -122,12 +122,12 @@ const typeDefs = `
     addBook(
         title: String!
         author: String!
-        published: Int!
+        published: String!
         genres: [String!]!
     ): Book!,
     editAuthor(
         name: String!
-        setBornTo: Int!
+        setBornTo: String!
     ): Author
   }
 `
@@ -146,14 +146,14 @@ const resolvers = {
         return books
     },
     allAuthors: () => {
-        return authors.map(author => {
+      return authors.map(author => {
         const bookCount = books.filter(book => book.author === author.name).length
-            return { name: author.name, born: author.born, bookCount }
-        })
-    }
+        return { name: author.name, born: author.born || null, bookCount }
+      })
+  }
   },
   Mutation: {
-    addBook: (parent, args) => {
+    addBook: (root, args) => {
         const { title, author: authorName, published, genres } = args
 
         let author = authors.find(a => a.name === authorName)
@@ -170,12 +170,13 @@ const resolvers = {
             title,
             published,
             author: author.name,
-            id: String(books.length + 1)
+            id: String(books.length + 1),
+            genres
         }
         books.push(book)
         return book
     },
-    editAuthor: (parent, args) => {
+    editAuthor: (root, args) => {
         const { name, setBornTo } = args
 
         const a = authors.find(a => a.name === name)

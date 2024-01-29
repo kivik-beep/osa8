@@ -4,7 +4,13 @@ import { useState } from 'react'
 
 const Authors = (props) => {
   const { loading, error, data } = useQuery(ALL_AUTHORS)
-  const [updateYear, result] = useMutation(EDIT_AUTHOR)
+  const [ updateYear ] = useMutation(EDIT_AUTHOR, {
+    refetchQueries: [ { query: ALL_AUTHORS } ],
+    onError: (error) => {
+      const messages = error.graphQLErrors.map(e => e.message).join('\n')
+      console.log('error:', messages)
+    }
+  })
 
   const [name, setName] = useState('')
   const [year, setYear] = useState('')
@@ -15,11 +21,9 @@ const Authors = (props) => {
     
       console.log('Updating birth year for:', name);
       console.log('New birth year:', year)
-      const yearInInt = parseInt(year)
-      updateYear({ variables: { name, yearInInt } })
+      await updateYear({ variables: { name: name, setBornTo: year } })
 
       setYear('')
-      console.log('results:', result.data)
   }
 
   if (!props.show) {
