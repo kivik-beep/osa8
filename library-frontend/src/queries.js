@@ -49,3 +49,15 @@ export const EDIT_AUTHOR = gql`
     }
   }
 `
+
+export const LOGIN = gql`
+  mutation logIn($user: String!, $password: String!) {
+    logIn(
+      user: $user
+      password: $password
+    ) {
+      user
+      password
+    }
+  }
+`
