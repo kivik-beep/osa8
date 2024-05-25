@@ -215,6 +215,26 @@ const resolvers = {
   }
 }
 
+resolvers.Query.allBooks = async (root, args) => {
+  if (args.genre) {
+    return Book.find({ genres: args.genre }).populate('author');
+  } else {
+    if (args.author && args.genre) {
+      const author = await Author.findOne({ name: args.author })
+      if (!author) return []
+      return Book.find({ author: author._id, genres: { $in: [args.genre] } }).populate('author')
+    } else if (args.author) {
+      const author = await Author.findOne({ name: args.author })
+      if (!author) return []
+      return Book.find({ author: author._id }).populate('author')
+    } else if (args.genre) {
+      return Book.find({ genres: { $in: [args.genre] } }).populate('author')
+    } else {
+      return Book.find({}).populate('author')
+    }
+  }
+}
+
 const server = new ApolloServer({
   typeDefs,
   resolvers

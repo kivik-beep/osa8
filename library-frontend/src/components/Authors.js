@@ -21,7 +21,7 @@ const Authors = (props) => {
     
       console.log('Updating birth year for:', name);
       console.log('New birth year:', year)
-      await updateYear({ variables: { name: name, setBornTo: year } })
+      await updateYear({ variables: { name: name, setBornTo: parseInt(year) } })
 
       setYear('')
   }
